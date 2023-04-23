@@ -6,7 +6,7 @@ public class Bandit : MonoBehaviour {
     [SerializeField] float      m_speed = 4.0f;
     [SerializeField] float      m_jumpForce = 7.5f;
 
-    private Animator            m_animator;
+    [SerializeField] Animator   m_animator;
     private Rigidbody2D         m_body2d;
     private Sensor_Bandit       m_groundSensor;
     private bool                m_grounded = false;
@@ -15,7 +15,6 @@ public class Bandit : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        m_animator = GetComponent<Animator>();
         m_body2d = GetComponent<Rigidbody2D>();
         m_groundSensor = transform.Find("GroundSensor").GetComponent<Sensor_Bandit>();
     }
@@ -33,15 +32,16 @@ public class Bandit : MonoBehaviour {
             m_grounded = false;
             m_animator.SetBool("Grounded", m_grounded);
         }
+        
 
         // -- Handle input and movement --
         float inputX = Input.GetAxis("Horizontal");
 
         // Swap direction of sprite depending on walk direction
         if (inputX > 0)
-            transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
+            transform.localScale = new Vector3(2.0f, 2.0f, 1.0f);
         else if (inputX < 0)
-            transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+            transform.localScale = new Vector3(-2.0f, 2.0f, 1.0f);
 
         // Move
         m_body2d.velocity = new Vector2(inputX * m_speed, m_body2d.velocity.y);
@@ -65,8 +65,8 @@ public class Bandit : MonoBehaviour {
             m_animator.SetTrigger("Hurt");
 
         //Attack
-        else if(Input.GetMouseButtonDown(0)) {
-            m_animator.SetTrigger("Attack");
+        else if(Input.GetKeyDown("a")) {
+            Attack();
         }
 
         //Change between idle and combat idle
@@ -93,5 +93,17 @@ public class Bandit : MonoBehaviour {
         //Idle
         else
             m_animator.SetInteger("AnimState", 0);
+    }
+
+    void Attack()
+    {
+
+        //Play an attack animation
+        m_animator.SetTrigger("Attack");
+
+
+        //Detect enemies in range of attack
+
+        //Damage them
     }
 }
