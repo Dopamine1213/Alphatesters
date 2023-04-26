@@ -10,6 +10,7 @@ public class Bandit : MonoBehaviour {
     private Rigidbody2D         m_body2d;
     private Sensor_Bandit       m_groundSensor;
     private bool                m_grounded = true;
+    private bool                m_jumping = false;
     private bool                m_combatIdle = false;
     private bool                m_isDead = false;
 
@@ -27,10 +28,20 @@ public class Bandit : MonoBehaviour {
         if (collision.gameObject.CompareTag("Ground"))
         {
             m_grounded = true;
+            m_jumping = false;
+            m_animator.SetBool("Grounded", m_grounded);
         }
     }
     // Update is called once per frame
     void Update () {
+
+        if (m_grounded)
+        {
+            Debug.Log("m_ground is true");
+        }
+        else {
+            Debug.Log("m_ground is false");
+        }
         /*
         //Check if character just landed on the ground
         if (!m_grounded && m_groundSensor.State()) {
@@ -50,15 +61,11 @@ public class Bandit : MonoBehaviour {
         float inputX = Input.GetAxis("Horizontal");
         moveX();
         //Run
-
             if (inputX != 0)// Mathf.Abs(inputX) > Mathf.Epsilon
             m_animator.SetInteger("AnimState", 2);
-
-
         //Combat Idle
         else if (m_combatIdle)
             m_animator.SetInteger("AnimState", 1);
-
         //Idle
         else
             m_animator.SetInteger("AnimState", 0);
@@ -88,16 +95,16 @@ public class Bandit : MonoBehaviour {
             m_combatIdle = !m_combatIdle;
 
         //Jump
-        else if (Input.GetKeyDown("space") && m_grounded) {
+        else if (Input.GetKeyDown("space") && m_grounded && !m_jumping) {
             m_animator.SetTrigger("Jump");
             m_grounded = false;
+            m_jumping = true;
             m_animator.SetBool("Grounded",m_grounded);
             /*
             m_body2d.velocity = new Vector2(m_body2d.velocity.x, m_jumpForce);
             m_groundSensor.Disable(0.2f);
             */
             m_body2d.AddForce(new Vector2(0f, m_jumpForce), ForceMode2D.Impulse);
-            m_animator.SetInteger("AnimState", 2);
         }
         
     }
