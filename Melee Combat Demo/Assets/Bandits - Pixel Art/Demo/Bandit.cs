@@ -9,18 +9,29 @@ public class Bandit : MonoBehaviour {
     [SerializeField] Animator   m_animator;
     private Rigidbody2D         m_body2d;
     private Sensor_Bandit       m_groundSensor;
-    private bool                m_grounded = false;
+    private bool                m_grounded = true;
     private bool                m_combatIdle = false;
     private bool                m_isDead = false;
 
     // Use this for initialization
     void Start () {
         m_body2d = GetComponent<Rigidbody2D>();
+        /*
         m_groundSensor = transform.Find("GroundSensor").GetComponent<Sensor_Bandit>();
+        */
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            m_grounded = true;
+        }
+    }
+    // Update is called once per frame
+    void Update () {
+        /*
         //Check if character just landed on the ground
         if (!m_grounded && m_groundSensor.State()) {
             m_grounded = true;
@@ -32,22 +43,25 @@ public class Bandit : MonoBehaviour {
             m_grounded = false;
             m_animator.SetBool("Grounded", m_grounded);
         }
-        
+        */
+
 
         // -- Handle input and movement --
         float inputX = Input.GetAxis("Horizontal");
+        moveX();
+        //Run
 
-        // Swap direction of sprite depending on walk direction
-        if (inputX > 0)
-            transform.localScale = new Vector3(2.0f, 2.0f, 1.0f);
-        else if (inputX < 0)
-            transform.localScale = new Vector3(-2.0f, 2.0f, 1.0f);
+            if (inputX != 0)// Mathf.Abs(inputX) > Mathf.Epsilon
+            m_animator.SetInteger("AnimState", 2);
 
-        // Move
-        m_body2d.velocity = new Vector2(inputX * m_speed, m_body2d.velocity.y);
 
-        //Set AirSpeed in animator
-        m_animator.SetFloat("AirSpeed", m_body2d.velocity.y);
+        //Combat Idle
+        else if (m_combatIdle)
+            m_animator.SetInteger("AnimState", 1);
+
+        //Idle
+        else
+            m_animator.SetInteger("AnimState", 0);
 
         // -- Handle Animations --
         //Death
@@ -77,33 +91,46 @@ public class Bandit : MonoBehaviour {
         else if (Input.GetKeyDown("space") && m_grounded) {
             m_animator.SetTrigger("Jump");
             m_grounded = false;
-            m_animator.SetBool("Grounded", m_grounded);
+            m_animator.SetBool("Grounded",m_grounded);
+            /*
             m_body2d.velocity = new Vector2(m_body2d.velocity.x, m_jumpForce);
             m_groundSensor.Disable(0.2f);
-        }
-
-        //Run
-        else if (Mathf.Abs(inputX) > Mathf.Epsilon)
+            */
+            m_body2d.AddForce(new Vector2(0f, m_jumpForce), ForceMode2D.Impulse);
             m_animator.SetInteger("AnimState", 2);
-
-        //Combat Idle
-        else if (m_combatIdle)
-            m_animator.SetInteger("AnimState", 1);
-
-        //Idle
-        else
-            m_animator.SetInteger("AnimState", 0);
+        }
+        
     }
+    
 
     void Attack()
     {
 
         //Play an attack animation
         m_animator.SetTrigger("Attack");
+        m_animator.SetInteger("AnimState", 1);
 
 
         //Detect enemies in range of attack
 
         //Damage them
     }
+
+    void moveX() 
+    {
+        float inputX = Input.GetAxis("Horizontal");
+        // Move - m_body2d.velocity = new Vector2(inputX * m_speed, m_body2d.velocity.y);
+        // Swap direction of sprite depending on walk direction
+        if (inputX > 0)
+            transform.localScale = new Vector3(2.0f, 2.0f, 1.0f);
+        else if (inputX < 0)
+            transform.localScale = new Vector3(-2.0f, 2.0f, 1.0f);
+        transform.position += new Vector3(inputX, 0f, 0f) * Time.deltaTime * m_speed;
+        m_animator.SetInteger("AnimState", 2);
+        //Set AirSpeed in animator - m_animator.SetFloat("AirSpeed", m_body2d.velocity.y);
+
+    }
+
+
+
 }
